@@ -1,0 +1,43 @@
+stages:
+  - before      
+  - build
+  - deploy
+  - test
+
+before-job:
+  tags:
+    - kube
+  stage: before
+  script:
+    - echo "before"      
+      # - sudo kubectl delete -f ./my-web.yaml
+      #    - docker rmi image konstantin8022/image:test5 
+
+build-job:
+  tags:
+    - kube       # This job runs in the build stage, which runs first.
+  stage: build
+  script:
+    - echo "Compile build."
+    - cd docker-build
+    - docker build -t konstantin8022/image:test6 .
+    - docker push konstantin8022/image:test6   
+
+deploy-job:
+  tags:
+    - kube       # This job runs in the build stage, which runs first.
+  stage: deploy
+  script:
+    - echo "Deploy." 
+    - sudo kubectl apply -f ./my-web.yaml
+    - sleep 30
+    - sudo  kubectl patch svc my-web-service -p '{"spec":{"externalIPs":["192.168.1.250"]}}'
+
+test-job:
+  tags:
+    - kube
+  stage: test
+  script:
+    - echo "tessss"
+    - curl 192.168.1.250
+

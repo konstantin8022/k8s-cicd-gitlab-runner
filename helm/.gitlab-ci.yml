@@ -1,0 +1,34 @@
+stages:
+  - before        
+  - build
+  - deploy
+
+before-job:
+  tags:
+    - helm
+  stage: before
+  script:
+    - cd deploy/helm-old
+    - sudo helm delete hello-world2      
+    - docker rmi konstantin8022/helm:test18
+    - echo "before18"
+build-job:
+  tags:
+    - helm       
+  stage: build
+  script:
+    - echo "Compiling the code..."
+    - cd src/app
+    - docker build -t konstantin8022/helm:test19 .
+    - docker push konstantin8022/helm:test19
+deploy-job:
+  tags:
+    - helm
+  stage: deploy
+  script:
+    - echo "deploy"
+    - cd deploy/helm  
+    - sudo helm install hello-world2 ./hello-kubernetes
+
+
+
